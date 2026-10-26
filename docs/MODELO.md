@@ -57,3 +57,36 @@ De acuerdo con la lección 22 y `CMDB.xlsx`, la jerarquía implementada en `ci_c
 
 **Manejo de Ciclos:**
 La jerarquía de clasificación (`ci_clases`) tiene una restricción estricta `ON DELETE RESTRICT` y se valida en el servidor para evitar ciclos padre-hijo. Las relaciones técnicas (`ci_relaciones`) permiten ciclos (ej. un servidor depende de un switch y el switch está conectado al servidor), pero se manejan en las consultas de grafos con límites de profundidad para evitar desbordamiento de pila.
+
+## 3. Transcripción y Mapeo de la CMDB Original (`CMDB.xlsx`)
+
+**Fuente:** Hoja `CMDB` (Sheet 1), Celda A4 a U5.
+**Jerarquía Implementada:** Se transcribió la jerarquía de la Lección 22 y la estructura de la hoja de Excel. La tabla relacional `ci_clases` reproduce el árbol (Hardware -> Servidores, etc.), mientras que la tabla `ci_dispositivos` contiene los atributos específicos.
+
+**Mapeo de Columnas (Excel a PostgreSQL):**
+*Identificando diferencias y nuevos campos agregados para el proyecto:*
+
+| Columna en Excel (Celda) | Campo en Base de Datos (`ci_dispositivos`) | Nota / Diferencia |
+| :--- | :--- | :--- |
+| **B4:** Nombre del CI | `nombre` | Mapeo directo |
+| **C4:** Tipo de CI | `clase_id` (FK a `ci_clases`) | Normalizado para evitar duplicidad de texto |
+| **D4:** Descripción | `atributos_tecnicos` (JSONB) | *Campo agregado:* Se movió a JSONB para flexibilidad técnica. |
+| **E4:** Número de Serie | `numero_serie` | Mapeo directo |
+| **F4:** Versión | `version` | Mapeo directo |
+| **G4:** Fecha de Adquisición | `fecha_adquisicion` | Mapeo directo (Tipo DATE) |
+| **H4:** Estado Actual | `estado` | Mapeo directo |
+| **I4:** Relaciones | `ci_relaciones` (Tabla aparte) | *Diferencia:* El Excel lo tiene como texto libre; nosotros lo modelamos como un Grafo Dirigido (origen, destino, tipo). |
+| **J4:** Padres/Hijos | `ci_clases` (Relación recursiva) | Implementado como árbol estricto. |
+| **K4:** Ubicación Física | `ubicacion_fisica` | Mapeo directo |
+| **L4:** Propietario/Responsable| `propietario` | Mapeo directo |
+| **M4, N4, O4:** Cambios/Docs | `documentacion_url` | *Diferencia:* Se simplificó a una URL. El historial real se maneja en tickets. |
+| **P4:** Enlaces a Incidentes | *(Relación N:M en Tickets)* | *Diferencia:* El Excel sugiere un enlace estático; en nuestro sistema es dinámico vía tabla relacional de tickets. |
+| **Q4:** Niveles de Seguridad | `nivel_seguridad` | Mapeo directo |
+| **R4:** Cumplimiento | `estado_configuracion` | Mapeo directo |
+| **S4:** Estado de Configuración| `estado_configuracion` | Mapeo directo |
+| **T4:** Número de Licencia | `licencia` | Mapeo directo |
+| **U4:** Fecha de Vencimiento | `fecha_vencimiento` | Mapeo directo |
+| *(No existe en Excel)* | `codigo_unico` | *Campo Nuevo:* Agregado por SRE para identificación única obligatoria. |
+| *(No existe en Excel)* | `clase_id` | *Campo Nuevo:* FK para jerarquía. |
+
+**Nota de implementación:** El archivo Excel solo contenía 2 filas de ejemplo ("Servidor1" y "Aplicación"). Por lo tanto, la inserción de los 5,000 dispositivos se realizó mediante el generador sintético `generate_cmdb.py`, el cual **respeta estrictamente** este esquema y mapeo, poblando las nuevas tablas.

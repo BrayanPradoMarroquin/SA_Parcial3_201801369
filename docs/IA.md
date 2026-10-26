@@ -47,3 +47,15 @@ Se mantuvo un contexto estricto mediante un archivo de reglas (`AGENTS.md` conce
 * *Ejecución:* `python generate_cmdb.py`
 * *Evaluación:* Error `relation "ci_relaciones" does not exist`.
 * *Corrección:* Como PostgreSQL solo corre init scripts en volúmenes vacíos, se ejecutó `docker compose down -v` para forzar la recreación de la base de datos con los nuevos archivos SQL.
+
+## Harness Engineering
+El archivo `scripts/harness.sh` automatiza todo el ciclo de vida:
+1. `docker compose down -v --remove-orphans` (Limpieza total).
+2. `docker compose up -d` (Aprovisionamiento).
+3. `python import_catalog.py` (Carga de datos base).
+4. `python generate_cmdb.py` (Generación de 5000 CI).
+5. `pytest tests/` (Validación).
+*Retorna código de salida 0 si todo pasa, deteniendo la ejecución en caso de error (`set -e`).*
+
+## Manejo de Grafos (CMDB)
+La tabla `ci_relaciones` implementa un grafo dirigido. Para evitar ciclos infinitos al consultar dependencias (ej. Servidor A depende de Switch B, que está conectado a Servidor A), las consultas en la API utilizan CTEs recursivos (`WITH RECURSIVE`) con un límite de profundidad (`MAX_DEPTH = 5`).

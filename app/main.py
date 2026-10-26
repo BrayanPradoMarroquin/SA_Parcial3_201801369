@@ -1,9 +1,7 @@
 from fastapi import FastAPI
-from . import auth, models
-from .database import engine
-
-# (Opcional: crear tablas si no existen, aunque ya lo hace el init.sql)
-# models.Base.metadata.create_all(bind=engine)
+import auth
+import models
+from database import engine
 
 app = FastAPI(title="Service Desk API")
 

@@ -1,10 +1,15 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
-from sqlalchemy.orm import relationship
-from .database import Base
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, JSON
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, JSON, Table
 from sqlalchemy.orm import relationship
 import uuid
 from datetime import datetime
+from database import Base
+
+# Tabla intermedia para la relación Many-to-Many entre Usuarios y Roles
+usuarios_roles = Table(
+    'usuarios_roles', Base.metadata,
+    Column('usuario_id', Integer, ForeignKey('usuarios.id', ondelete="CASCADE"), primary_key=True),
+    Column('rol_id', Integer, ForeignKey('roles.id', ondelete="CASCADE"), primary_key=True)
+)
 
 class Usuario(Base):
     __tablename__ = "usuarios"
@@ -13,7 +18,7 @@ class Usuario(Base):
     password_hash = Column(String)
     activo = Column(Boolean, default=True)
     
-    roles = relationship("Rol", secondary="usuarios_roles", backref="usuarios")
+    roles = relationship("Rol", secondary=usuarios_roles, backref="usuarios")
 
 class Rol(Base):
     __tablename__ = "roles"

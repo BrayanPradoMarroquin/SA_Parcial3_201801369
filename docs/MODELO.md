@@ -34,3 +34,26 @@ Se implementaron los 7 procesos obligatorios. Cada cola en la base de datos (`co
 7. Gestión de servicios de tecnología (`SERVICIOS_TEC`)
 
 **Política de Asignación:** Manual con bloqueo pesimista a nivel de base de datos. El primer agente que envía la petición de "Tomar ticket" es el único que recibe el código HTTP 200; el resto recibe 409 Conflict.
+
+### Jerarquía y Diccionario CMDB
+De acuerdo con la lección 22 y `CMDB.xlsx`, la jerarquía implementada en `ci_clases` es:
+- Nivel 1: Hardware, Software, Redes.
+- Nivel 2: Servidores, Equipos de Usuario, Switches.
+
+**Mapeo de Fuente (CMDB.xlsx a PostgreSQL):**
+*   *Nombre del CI* -> `ci_dispositivos.nombre`
+*   *Tipo de CI* -> `ci_dispositivos.clase_id` (FK a `ci_clases`)
+*   *Descripción / Atributos* -> `ci_dispositivos.atributos_tecnicos` (JSONB)
+*   *Número de Serie* -> `ci_dispositivos.numero_serie`
+*   *Versión* -> `ci_dispositivos.version`
+*   *Fecha de Adquisición* -> `ci_dispositivos.fecha_adquisicion`
+*   *Estado Actual* -> `ci_dispositivos.estado`
+*   *Relaciones* -> `ci_relaciones` (Grafo técnico: depende_de, conectado_a, alojado_en)
+*   *Ubicación Física* -> `ci_dispositivos.ubicacion_fisica`
+*   *Propietario/Responsable* -> `ci_dispositivos.propietario`
+*   *Niveles de Seguridad* -> `ci_dispositivos.nivel_seguridad`
+*   *Cumplimiento* -> `ci_dispositivos.estado_configuracion`
+*   *Número de Licencia* -> `ci_dispositivos.licencia`
+
+**Manejo de Ciclos:**
+La jerarquía de clasificación (`ci_clases`) tiene una restricción estricta `ON DELETE RESTRICT` y se valida en el servidor para evitar ciclos padre-hijo. Las relaciones técnicas (`ci_relaciones`) permiten ciclos (ej. un servidor depende de un switch y el switch está conectado al servidor), pero se manejan en las consultas de grafos con límites de profundidad para evitar desbordamiento de pila.

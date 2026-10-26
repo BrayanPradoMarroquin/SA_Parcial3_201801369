@@ -3,14 +3,8 @@ from sqlalchemy import text
 from fastapi import HTTPException
 
 def tomar_ticket(db: Session, ticket_id: int, agente_id: int):
-    """
-    Asigna un ticket a un agente de forma atómica.
-    Si otro agente ya lo tomó, lanza un error 409 (Conflict).
-    """
-    # Iniciamos una transacción explícita
     try:
-        # El UPDATE condicional (WHERE asignado_a_id IS NULL) es atómico en Postgres.
-        # Si dos agentes entran a la vez, solo el primero afectará 1 fila. El segundo afectará 0 filas.
+        # Bloqueo atómico
         result = db.execute(
             text("""
                 UPDATE tickets 
@@ -30,7 +24,7 @@ def tomar_ticket(db: Session, ticket_id: int, agente_id: int):
             db.rollback()
             raise HTTPException(status_code=409, detail="El ticket ya fue tomado por otro agente o no existe.")
             
-        # Registrar en la bitácora (Auditoría)
+        # Registrar en la bitácora
         db.execute(
             text("""
                 INSERT INTO ticket_historial (ticket_id, actor_id, accion, valor_nuevo)

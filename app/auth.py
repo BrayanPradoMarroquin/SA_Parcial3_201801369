@@ -5,8 +5,8 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import os
 from sqlalchemy.orm import Session
-from .database import get_db
-from . import models
+from database import get_db
+import models
 
 SECRET_KEY = os.getenv("SECRET_KEY", "supersecretkey")
 ALGORITHM = "HS256"

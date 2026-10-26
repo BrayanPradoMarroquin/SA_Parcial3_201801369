@@ -26,6 +26,16 @@ CREATE TABLE colas (
     reglas_ordenamiento VARCHAR(100) DEFAULT 'prioridad_desc, fecha_creacion_asc'
 );
 
+-- Insertar las 7 colas obligatorias (una por proceso)
+INSERT INTO colas (proceso_id, codigo, nombre, descripcion) VALUES
+(1, 'COLA-NUEVOS', 'Cola Nuevos Servicios', 'Atención de requerimientos de nuevos servicios'),
+(2, 'COLA-CAMBIOS', 'Cola Cambios', 'Gestión de cambios de infraestructura'),
+(3, 'COLA-INCIDENTES', 'Cola Incidentes', 'Resolución de incidentes de TI'),
+(4, 'COLA-EVENTOS', 'Cola Eventos', 'Monitoreo y gestión de eventos'),
+(5, 'COLA-PROBLEMAS', 'Cola Problemas', 'Investigación de causa raíz'),
+(6, 'COLA-ACCESOS', 'Cola Accesos', 'Gestión de solicitudes de acceso'),
+(7, 'COLA-SERVICIOS', 'Cola Servicios Tecnología', 'Requisiciones de servicios de TI');
+
 -- 3. TICKETS (El núcleo del sistema)
 CREATE TABLE tickets (
     id SERIAL PRIMARY KEY,

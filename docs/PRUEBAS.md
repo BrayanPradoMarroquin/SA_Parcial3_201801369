@@ -2,7 +2,6 @@
 #### 2. Matriz Requisito → Prueba
 Hemos automatizado P01, P03 y P07.
 
-```markdown
 # Matriz de Pruebas y Resultados
 
 | ID | Requisito / Prueba | Implementación / Evidencia | Resultado |
